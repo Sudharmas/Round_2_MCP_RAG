@@ -1,0 +1,529 @@
+<!--&lt;!&ndash;<!DOCTYPE html>&ndash;&gt;-->
+<!--&lt;!&ndash;<html lang="en">&ndash;&gt;-->
+<!--&lt;!&ndash;<head>&ndash;&gt;-->
+<!--&lt;!&ndash;    <meta charset="UTF-8">&ndash;&gt;-->
+<!--&lt;!&ndash;    <meta name="viewport" content="width=device-width, initial-scale=1.0">&ndash;&gt;-->
+<!--&lt;!&ndash;    <title>Agentic AI Assistant</title>&ndash;&gt;-->
+<!--&lt;!&ndash;    <style>&ndash;&gt;-->
+<!--&lt;!&ndash;        :root {&ndash;&gt;-->
+<!--&lt;!&ndash;            &#45;&#45;bg-color: #1e1e2e;&ndash;&gt;-->
+<!--&lt;!&ndash;            &#45;&#45;chat-bg: #2b2b40;&ndash;&gt;-->
+<!--&lt;!&ndash;            &#45;&#45;user-msg: #4c4f69;&ndash;&gt;-->
+<!--&lt;!&ndash;            &#45;&#45;bot-msg: #3a3c58;&ndash;&gt;-->
+<!--&lt;!&ndash;            &#45;&#45;accent: #89b4fa;&ndash;&gt;-->
+<!--&lt;!&ndash;            &#45;&#45;text: #cdd6f4;&ndash;&gt;-->
+<!--&lt;!&ndash;        }&ndash;&gt;-->
+<!--&lt;!&ndash;        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(&#45;&#45;bg-color); color: var(&#45;&#45;text); display: flex; height: 100vh; }&ndash;&gt;-->
+
+<!--&lt;!&ndash;        /* Sidebar */&ndash;&gt;-->
+<!--&lt;!&ndash;        .sidebar { width: 260px; background: #181825; padding: 20px; display: flex; flex-direction: column; gap: 15px; border-right: 1px solid #313244; }&ndash;&gt;-->
+<!--&lt;!&ndash;        .sidebar h2 { font-size: 1.2rem; margin-bottom: 10px; color: var(&#45;&#45;accent); }&ndash;&gt;-->
+<!--&lt;!&ndash;        label { font-size: 0.9rem; font-weight: bold; margin-bottom: 5px; display: block; }&ndash;&gt;-->
+<!--&lt;!&ndash;        select { width: 100%; padding: 10px; background: #313244; border: 1px solid #45475a; color: white; border-radius: 6px; outline: none; }&ndash;&gt;-->
+
+<!--&lt;!&ndash;        /* Chat Area */&ndash;&gt;-->
+<!--&lt;!&ndash;        .chat-container { flex: 1; display: flex; flex-direction: column; background: var(&#45;&#45;bg-color); }&ndash;&gt;-->
+<!--&lt;!&ndash;        .chat-history { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }&ndash;&gt;-->
+
+<!--&lt;!&ndash;        .message { padding: 15px; border-radius: 10px; max-width: 80%; line-height: 1.5; }&ndash;&gt;-->
+<!--&lt;!&ndash;        .user { align-self: flex-end; background: var(&#45;&#45;accent); color: #1e1e2e; font-weight: 500; }&ndash;&gt;-->
+<!--&lt;!&ndash;        .bot { align-self: flex-start; background: var(&#45;&#45;bot-msg); border: 1px solid #45475a; }&ndash;&gt;-->
+<!--&lt;!&ndash;        .bot strong { color: var(&#45;&#45;accent); }&ndash;&gt;-->
+
+<!--&lt;!&ndash;        .input-area { padding: 20px; background: #181825; display: flex; gap: 10px; align-items: center; }&ndash;&gt;-->
+<!--&lt;!&ndash;        .input-area input { flex: 1; padding: 12px; border-radius: 6px; border: 1px solid #45475a; background: #313244; color: white; outline: none; }&ndash;&gt;-->
+<!--&lt;!&ndash;        button { padding: 10px 20px; background: var(&#45;&#45;accent); border: none; border-radius: 6px; cursor: pointer; font-weight: bold; color: #1e1e2e; }&ndash;&gt;-->
+<!--&lt;!&ndash;        button:hover { opacity: 0.9; }&ndash;&gt;-->
+
+<!--&lt;!&ndash;        .debug-info { font-size: 0.8rem; color: #a6adc8; margin-top: 5px; padding-top: 5px; border-top: 1px solid #45475a; }&ndash;&gt;-->
+<!--&lt;!&ndash;    </style>&ndash;&gt;-->
+<!--&lt;!&ndash;</head>&ndash;&gt;-->
+<!--&lt;!&ndash;<body>&ndash;&gt;-->
+
+<!--&lt;!&ndash;    <div class="sidebar">&ndash;&gt;-->
+<!--&lt;!&ndash;        <h2>⚡ Agent Configuration</h2>&ndash;&gt;-->
+
+<!--&lt;!&ndash;        <div>&ndash;&gt;-->
+<!--&lt;!&ndash;            <label>Search Strategy</label>&ndash;&gt;-->
+<!--&lt;!&ndash;            <select id="modeSelect">&ndash;&gt;-->
+<!--&lt;!&ndash;                <option value="auto">🤖 Auto (Smart)</option>&ndash;&gt;-->
+<!--&lt;!&ndash;                <option value="rag">🔍 RAG (Search)</option>&ndash;&gt;-->
+<!--&lt;!&ndash;                <option value="cag">📖 CAG (Deep Read)</option>&ndash;&gt;-->
+<!--&lt;!&ndash;            </select>&ndash;&gt;-->
+<!--&lt;!&ndash;        </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;        <div style="margin-top: auto; font-size: 0.8rem; opacity: 0.7;">&ndash;&gt;-->
+<!--&lt;!&ndash;            <p>System: <span style="color: #a6e3a1;">Autonomous</span></p>&ndash;&gt;-->
+<!--&lt;!&ndash;            <p>Model: <span style="color: #fab387;">Gemini 2.5 Flash</span></p>&ndash;&gt;-->
+<!--&lt;!&ndash;        </div>&ndash;&gt;-->
+<!--&lt;!&ndash;    </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;    <div class="chat-container">&ndash;&gt;-->
+<!--&lt;!&ndash;        <div class="chat-history" id="chatHistory">&ndash;&gt;-->
+<!--&lt;!&ndash;            <div class="message bot">&ndash;&gt;-->
+<!--&lt;!&ndash;                <strong>System Ready.</strong><br>&ndash;&gt;-->
+<!--&lt;!&ndash;                I have indexed your knowledge base. Ask me anything about any product.&ndash;&gt;-->
+<!--&lt;!&ndash;                <br><em>e.g. "Compare the outputs of EX-1280 and DM6PE"</em>&ndash;&gt;-->
+<!--&lt;!&ndash;            </div>&ndash;&gt;-->
+<!--&lt;!&ndash;        </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;        <div class="input-area">&ndash;&gt;-->
+<!--&lt;!&ndash;            <input type="text" id="userQuery" placeholder="Ask a technical question..." onkeypress="handleEnter(event)">&ndash;&gt;-->
+<!--&lt;!&ndash;            <button onclick="sendMessage()">Send</button>&ndash;&gt;-->
+<!--&lt;!&ndash;        </div>&ndash;&gt;-->
+<!--&lt;!&ndash;    </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;    <script>&ndash;&gt;-->
+<!--&lt;!&ndash;        async function sendMessage() {&ndash;&gt;-->
+<!--&lt;!&ndash;            const queryBox = document.getElementById("userQuery");&ndash;&gt;-->
+<!--&lt;!&ndash;            const modeBox = document.getElementById("modeSelect");&ndash;&gt;-->
+<!--&lt;!&ndash;            const chatHistory = document.getElementById("chatHistory");&ndash;&gt;-->
+
+<!--&lt;!&ndash;            const question = queryBox.value.trim();&ndash;&gt;-->
+<!--&lt;!&ndash;            if (!question) return;&ndash;&gt;-->
+
+<!--&lt;!&ndash;            appendMessage(question, 'user');&ndash;&gt;-->
+<!--&lt;!&ndash;            queryBox.value = "";&ndash;&gt;-->
+
+<!--&lt;!&ndash;            const loadingId = appendMessage("Thinking...", 'bot');&ndash;&gt;-->
+
+<!--&lt;!&ndash;            try {&ndash;&gt;-->
+<!--&lt;!&ndash;                const response = await fetch("/ask", {&ndash;&gt;-->
+<!--&lt;!&ndash;                    method: "POST",&ndash;&gt;-->
+<!--&lt;!&ndash;                    headers: { "Content-Type": "application/json" },&ndash;&gt;-->
+<!--&lt;!&ndash;                    body: JSON.stringify({&ndash;&gt;-->
+<!--&lt;!&ndash;                        question: question,&ndash;&gt;-->
+<!--&lt;!&ndash;                        product_filter: null, // ALWAYS NULL: Let the backend decide!&ndash;&gt;-->
+<!--&lt;!&ndash;                        mode: modeBox.value&ndash;&gt;-->
+<!--&lt;!&ndash;                    })&ndash;&gt;-->
+<!--&lt;!&ndash;                });&ndash;&gt;-->
+
+<!--&lt;!&ndash;                const data = await response.json();&ndash;&gt;-->
+<!--&lt;!&ndash;                const botDiv = document.getElementById(loadingId);&ndash;&gt;-->
+
+<!--&lt;!&ndash;                let htmlContent = `<strong>Answer:</strong> ${data.answer}`;&ndash;&gt;-->
+
+<!--&lt;!&ndash;                if (data.mode_used) {&ndash;&gt;-->
+<!--&lt;!&ndash;                    htmlContent += `&ndash;&gt;-->
+<!--&lt;!&ndash;                        <div class="debug-info">&ndash;&gt;-->
+<!--&lt;!&ndash;                            <em>Strategy: ${data.mode_used.toUpperCase()}</em><br>&ndash;&gt;-->
+<!--&lt;!&ndash;                            ${data.context_preview ? `Source Snippet: "${data.context_preview.substring(0, 100)}..."` : ''}&ndash;&gt;-->
+<!--&lt;!&ndash;                        </div>&ndash;&gt;-->
+<!--&lt;!&ndash;                    `;&ndash;&gt;-->
+<!--&lt;!&ndash;                }&ndash;&gt;-->
+<!--&lt;!&ndash;                botDiv.innerHTML = htmlContent;&ndash;&gt;-->
+
+<!--&lt;!&ndash;            } catch (error) {&ndash;&gt;-->
+<!--&lt;!&ndash;                console.error(error);&ndash;&gt;-->
+<!--&lt;!&ndash;                document.getElementById(loadingId).innerText = "Error: Connection lost.";&ndash;&gt;-->
+<!--&lt;!&ndash;            }&ndash;&gt;-->
+<!--&lt;!&ndash;        }&ndash;&gt;-->
+
+<!--&lt;!&ndash;        function appendMessage(text, sender) {&ndash;&gt;-->
+<!--&lt;!&ndash;            const history = document.getElementById("chatHistory");&ndash;&gt;-->
+<!--&lt;!&ndash;            const msgDiv = document.createElement("div");&ndash;&gt;-->
+<!--&lt;!&ndash;            msgDiv.className = `message ${sender}`;&ndash;&gt;-->
+<!--&lt;!&ndash;            msgDiv.id = `msg-${Date.now()}`;&ndash;&gt;-->
+<!--&lt;!&ndash;            msgDiv.innerHTML = text;&ndash;&gt;-->
+<!--&lt;!&ndash;            history.appendChild(msgDiv);&ndash;&gt;-->
+<!--&lt;!&ndash;            history.scrollTop = history.scrollHeight;&ndash;&gt;-->
+<!--&lt;!&ndash;            return msgDiv.id;&ndash;&gt;-->
+<!--&lt;!&ndash;        }&ndash;&gt;-->
+
+<!--&lt;!&ndash;        function handleEnter(e) { if (e.key === 'Enter') sendMessage(); }&ndash;&gt;-->
+<!--&lt;!&ndash;    </script>&ndash;&gt;-->
+<!--&lt;!&ndash;</body>&ndash;&gt;-->
+<!--&lt;!&ndash;</html>&ndash;&gt;-->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agentic AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #050510;
+            --glass-panel: rgba(20, 20, 35, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --neon-blue: #00f3ff;
+            --neon-purple: #bc13fe;
+            --text-main: #e0e0e0;
+            --text-dim: #6c6c80;
+            --user-bubble: linear-gradient(135deg, #2b32b2 0%, #1488cc 100%);
+        }
+
+        /* --- ANIMATED BACKGROUND --- */
+        body {
+            margin: 0;
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: var(--bg-deep);
+            background-image:
+                radial-gradient(circle at 15% 50%, rgba(188, 19, 254, 0.15), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(0, 243, 255, 0.15), transparent 25%);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+            animation: bgPulse 10s ease-in-out infinite alternate;
+        }
+
+        @keyframes bgPulse {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 10% 5%; }
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: 300px;
+            background: var(--glass-panel);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid var(--glass-border);
+            padding: 40px 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            z-index: 2;
+        }
+
+        .brand {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            letter-spacing: -1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brand span { color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue); }
+
+        .control-group label {
+            display: block;
+            color: var(--text-dim);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 12px;
+        }
+
+        .select-wrapper {
+            position: relative;
+        }
+
+        select {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            appearance: none;
+            outline: none;
+            cursor: pointer;
+            transition: 0.3s;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        select:hover { border-color: var(--neon-blue); box-shadow: 0 0 15px rgba(0, 243, 255, 0.1); }
+
+        .select-wrapper::after {
+            content: '▼';
+            position: absolute;
+            right: 15px;
+            top: 18px;
+            font-size: 0.7rem;
+            color: var(--neon-blue);
+            pointer-events: none;
+        }
+
+        .status-panel {
+            margin-top: auto;
+            padding: 20px;
+            background: rgba(0,0,0,0.4);
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .dot { width: 8px; height: 8px; background: #00ff88; border-radius: 50%; box-shadow: 0 0 8px #00ff88; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+
+        /* --- CHAT AREA --- */
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .messages {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            scroll-behavior: smooth;
+        }
+
+        .message-row {
+            display: flex;
+            gap: 15px;
+            animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .message-row.user-row { flex-direction: row-reverse; }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--glass-border);
+        }
+
+        .bubble {
+            max-width: 70%;
+            padding: 18px 24px;
+            border-radius: 16px;
+            line-height: 1.6;
+            font-size: 0.95rem;
+            position: relative;
+        }
+
+        .user-row .bubble {
+            background: var(--user-bubble);
+            color: white;
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 5px 20px rgba(20, 136, 204, 0.3);
+        }
+
+        .bot-row .bubble {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-bottom-left-radius: 4px;
+            backdrop-filter: blur(10px);
+        }
+
+        .bubble strong { color: var(--neon-blue); font-weight: 600; }
+
+        /* Debug/Terminal Output */
+        .trace-log {
+            margin-top: 15px;
+            padding: 12px;
+            background: #0a0a12;
+            border-left: 2px solid var(--neon-purple);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: #a0a0b0;
+            border-radius: 0 4px 4px 0;
+        }
+
+        /* --- INPUT ZONE --- */
+        .input-zone {
+            padding: 30px;
+            background: linear-gradient(to top, var(--bg-deep) 0%, transparent 100%);
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .input-wrapper {
+            flex: 1;
+            position: relative;
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.1);
+            background: rgba(0,0,0,0.4);
+        }
+
+        input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 18px 20px;
+            color: white;
+            font-size: 1rem;
+            font-family: 'Space Grotesk', sans-serif;
+            outline: none;
+        }
+
+        button.send-btn {
+            background: var(--neon-blue);
+            color: #050510;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.3s;
+            margin-right: 5px;
+        }
+
+        button.send-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px var(--neon-blue);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="brand">
+            <span>●</span>  AI V2
+        </div>
+
+        <div class="control-group">
+            <label>Neural Strategy</label>
+            <div class="select-wrapper">
+                <select id="modeSelect">
+                    <option value="auto">🤖 Auto-Pilot (Adaptive)</option>
+                    <option value="rag">🔍 RAG (Precision Search)</option>
+                    <option value="cag">📖 CAG (Deep Context)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="status-panel">
+            <div class="status-item"><div class="dot"></div> SYSTEM ONLINE</div>
+            <div class="status-item" style="color: var(--text-dim);">Latency: 12ms</div>
+            <div class="status-item" style="color: var(--text-dim);">Vector DB: Connected</div>
+        </div>
+    </div>
+
+    <div class="chat-area">
+        <div class="messages" id="chatHistory">
+            <div class="message-row bot-row">
+                <div class="avatar">🤖</div>
+                <div class="bubble">
+                    <strong>System Initialized.</strong><br>
+                    I am connected to your document ingestion pipeline. You can ask about product specs, compare models, or request summaries.<br><br>
+                    <em>Try: "Compare the EX-1280 and DM6PE"</em>
+                </div>
+            </div>
+        </div>
+
+        <div class="input-zone">
+            <div class="input-wrapper">
+                <input type="text" id="userQuery" placeholder="Transmit query to agent..." onkeypress="handleEnter(event)">
+                <button class="send-btn" onclick="sendMessage()">➤</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function sendMessage() {
+            const queryBox = document.getElementById("userQuery");
+            const modeBox = document.getElementById("modeSelect");
+            const chatHistory = document.getElementById("chatHistory");
+
+            const question = queryBox.value.trim();
+            if (!question) return;
+
+            // 1. Render User Message
+            addMessage(question, 'user');
+            queryBox.value = "";
+
+            // 2. Render Loading State
+            const loadingId = addMessage("Analyzing vector space...", 'bot', true);
+
+            try {
+                // 3. API Call
+                const response = await fetch("/ask", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        question: question,
+                        product_filter: null, // Global Search
+                        mode: modeBox.value
+                    })
+                });
+
+                const data = await response.json();
+
+                // 4. Remove Loading & Add Real Response
+                document.getElementById(loadingId).remove();
+
+                let content = `<strong>Answer:</strong> ${formatText(data.answer)}`;
+
+                if (data.mode_used) {
+                    content += `
+                        <div class="trace-log">
+                            > STRATEGY: ${data.mode_used.toUpperCase()}<br>
+                            ${data.context_preview ? `> CONTEXT: "${data.context_preview.substring(0, 100)}..."` : ''}
+                        </div>
+                    `;
+                }
+
+                addMessage(content, 'bot');
+
+            } catch (error) {
+                document.getElementById(loadingId).innerHTML = `<div class="bubble" style="color: #ff5555;">Error: Neural Link Severed.</div>`;
+            }
+        }
+
+        function addMessage(html, type, isLoading = false) {
+            const history = document.getElementById("chatHistory");
+            const row = document.createElement("div");
+            row.className = `message-row ${type === 'user' ? 'user-row' : 'bot-row'}`;
+            row.id = `msg-${Date.now()}`;
+
+            const avatarChar = type === 'user' ? '👤' : '🤖';
+            const bubbleContent = isLoading ? `<span class="pulse-text">${html}</span>` : html;
+
+            row.innerHTML = `
+                <div class="avatar">${avatarChar}</div>
+                <div class="bubble">${bubbleContent}</div>
+            `;
+
+            history.appendChild(row);
+            history.scrollTop = history.scrollHeight;
+            return row.id;
+        }
+
+        function formatText(text) {
+            // Simple markdown formatter
+            return text
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold
+                .replace(/\n/g, '<br>'); // Newlines
+        }
+
+        function handleEnter(e) { if (e.key === 'Enter') sendMessage(); }
+    </script>
+</body>
+</html>
